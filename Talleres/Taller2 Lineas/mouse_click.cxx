@@ -396,6 +396,7 @@ void MouseCbk( int button, int state, int x, int y )
 void DisplayCbk( )
 {
   glClear(GL_COLOR_BUFFER_BIT);
+  glPointSize(1.0);
   glColor3f(1.0,0.0,0.0);
   glBegin(GL_POINTS);
     for(int i = 0;i<lineaDDA.size();i = i+2){
@@ -404,12 +405,27 @@ void DisplayCbk( )
   glEnd();
 
   glColor3f(0.0,1.0,0.0);
+  glPointSize(1.0);
   glBegin(GL_POINTS);
   glPointSize(10);
     for(int i = 0;i<lineaBresen.size();i = i+2){
       glVertex2f(lineaBresen[i],lineaBresen[i+1]);
     }
   glEnd();
+
+glColor3f(0.0,0.0,1.0);
+glPointSize(1.0);
+  glBegin(GL_POINTS);
+    for(int i = 0;i<lineaBresen.size();i=i+2){
+      for(int j = 0; j < lineaDDA.size();j=j+2){
+        if((int)lineaBresen[i] == (int)lineaDDA[j] && (int)lineaBresen[i+1] == (int)lineaDDA[j+1]){
+          glVertex2f(lineaBresen[i],lineaBresen[i+1]);
+        }
+      }
+    }
+  glEnd();
+
+
   glutSwapBuffers();
 }
 
