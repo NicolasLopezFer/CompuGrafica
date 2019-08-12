@@ -9,11 +9,15 @@
  * -------------------------------------------------------------------------
  */
 
-#include <GLUT/glut.h>
-#include <OpenGL/gl.h>
+//MAC
+//#include <GLUT/glut.h>
+//#include <OpenGL/gl.h>
+//g++ -std=c++17 mouse_click.cxx -lm -framework OpenGL -framework GLUT -o myMouseClickTest
 
+//UBUNTU
 //#include <GL/freeglut.h>
 //#include <GL/gl.h>
+//g++ -std=c++17 mouse_click.cxx -lm -lGL -lGLU -lglut -o myMouseClickTest
 
 #include <cmath>
 #include <iostream>
