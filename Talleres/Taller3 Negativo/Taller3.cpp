@@ -16,13 +16,14 @@
 #include <OpenGL/gl.h>
 //g++ -o pruebaApp taller1.cpp   -framework OpenGL -framework GLUT
 
-
+#include<iostream>
+#include <cmath>
 #include <cstdlib>
 #include <time.h>
 #define  RAND_MAX 1
 
 int main_w, w1,w2;
-
+GLfloat X=0.0,Y=0.0,Z=0.0;
 struct WindowData
 {
   unsigned long Width, Height;
@@ -33,10 +34,9 @@ WindowData win_data;
 void myInit (void)
 {
     glClearColor(0.0,0.0,0.0,1.0);
-
 }
 
-
+// -------------------------------------------------------------------------
 
 void pintar(int x0, int y0,int xf,int yf)
 {
@@ -52,7 +52,7 @@ void pintar(int x0, int y0,int xf,int yf)
 
 void myDisplay(int num)
 {
-
+  glTranslatef(X,Y,0);
   if(num == 1){
     glColor3f(0.84,0.85,0.79);
     glPointSize(1);
@@ -1094,10 +1094,10 @@ void myResize (int w, int h)
     glLoadIdentity();
     gluOrtho2D(0,win_data.Width/2,0,win_data.Height);
 
-    glViewport(0, 0, win_data.Width/2, win_data.Height);
+    glViewport(0, 0, w/2, h/2);
     myDisplay(1);
 
-    glViewport(win_data.Width/2, 0, win_data.Width/2, win_data.Height);
+    glViewport(w/2, 0, w/2, h);
     myDisplay(2);
 
     glMatrixMode(GL_MODELVIEW);
@@ -1113,6 +1113,7 @@ void pintar(void){
 
 
   glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
   glLoadIdentity();
   gluOrtho2D(0,win_data.Width/2,0,win_data.Height);
 
@@ -1126,6 +1127,63 @@ void pintar(void){
   glFlush();
   glutSwapBuffers();
 }
+
+
+void KeyboardCbk( unsigned char key, int x, int y ) //key: tecla oprimida x-y: posicion mouse
+{
+  switch (key) {
+    //Letra w
+    case 119:
+
+    Y-=2;
+    break;
+    //Letra a
+    case 97:
+
+    X+=2;
+    break;
+    //Letra s
+    case 115:
+
+    Y+=2;
+    break;
+    //letra d
+    case 100:
+
+    X-=2;
+    break;
+  }
+  glutPostRedisplay();
+}
+// -------------------------------------------------------------------------
+void SpecialKeyboardCbk( int key, int x, int y ) //gluf_f1 glut _up.... x-y: mouse
+{
+
+  switch (key) {
+    //Letra w
+    case GLUT_KEY_UP:
+
+    Y-=2;
+    break;
+    //Letra a
+    case GLUT_KEY_LEFT:
+
+    X+=2;
+    break;
+    //Letra s
+    case GLUT_KEY_DOWN:
+
+    Y+=2;
+    break;
+    //letra d
+    case GLUT_KEY_RIGHT:
+
+    X-=2;
+    break;
+  }
+  glutPostRedisplay();
+}
+
 
 int main (int argc, char** argv)
 {
@@ -1143,6 +1201,9 @@ int main (int argc, char** argv)
     glutCreateWindow("Duff Beer - Duff Beer Negativo");
 
     glutDisplayFunc(pintar);
+
+    glutKeyboardFunc(KeyboardCbk);
+    glutSpecialFunc(SpecialKeyboardCbk);
     glutReshapeFunc(myResize);
 
     myInit();
