@@ -1113,13 +1113,18 @@ void pintar(void){
 
 
   glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
   glLoadIdentity();
+  glPushMatrix();
   gluOrtho2D(0,win_data.Width/2,0,win_data.Height);
-
   glViewport(0, 0, win_data.Width/2, win_data.Height);
   myDisplay(1);
+  glMatrixMode(GL_MODELVIEW);
 
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glPushMatrix();
+  gluOrtho2D(0,win_data.Width/2,0,win_data.Height);
   glViewport(win_data.Width/2, 0, win_data.Width/2, win_data.Height);
   myDisplay(2);
 
