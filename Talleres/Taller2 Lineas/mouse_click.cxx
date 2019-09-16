@@ -10,8 +10,8 @@
  */
 
 //MAC
-//#include <GLUT/glut.h>
-//#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#include <OpenGL/gl.h>
 //g++ -std=c++17 mouse_click.cxx -lm -framework OpenGL -framework GLUT -o myMouseClickTest
 
 //UBUNTU
