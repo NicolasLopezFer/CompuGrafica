@@ -15,6 +15,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <cmath>
+#include <string>
 
 #include "Camera.h"
 #include "SpatialObject.h"
@@ -28,6 +29,11 @@ int numeroExtremidades = 0;
 int vectorX = 0;
 int vectorY = 0;
 int vectorZ = 0;
+int vectorXPad = 0;
+int vectorYPad = 0;
+int vectorZPad = 0;
+
+
 int coordActX = 0;
 int coordActY = 0;
 int coordActZ = 0;
@@ -66,13 +72,13 @@ int main( int argc, char* argv[] )
   glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB );
   glutInitWindowPosition( 50, 50 );
   glutInitWindowSize( 1024, 768 );
-  glutCreateWindow( "A solar system..." );
+  glutCreateWindow( "Parcial Brazo" );
   archivo = argv[1];
 
   // Init world
   try
   {
-    //myStar = initWorld( argc, argv );
+    myStar = initWorld( argc, argv );
 
     glutDisplayFunc( displayCbk );
     glutIdleFunc( idleCbk );
@@ -97,6 +103,10 @@ int main( int argc, char* argv[] )
 SpatialObject* initWorld( int argc, char* argv[] )
 {
   // Initialize camera
+  myCamera.setFOV( 45 );
+  myCamera.setPlanes( 1e-2, 100000 );
+  myCamera.move( Vector( 0, 0, 200 ) );
+  myCamera.lookAt( Vector(0,0,0) );
 
   // OpenGL initialization
   glClearColor( 0, 0, 0, 0 );
@@ -107,8 +117,76 @@ SpatialObject* initWorld( int argc, char* argv[] )
       std::string( "Usage: " ) + argv[ 0 ] + " world_description"
       );
 
+  ofstream file;
+
+  file.open("archivo.txt", ios::out);
+  string nombre = "archivo.txt";
+  if(!file.fail()){
+
+
+
+    char texto[500];
+    ifstream read;
+    char * vector;
+    int cont = 0;
+    acumlong = 0;
+    numExt = 0;
+    read.open(archivo,ios::out);
+    if(read.is_open()){
+      while(!read.eof()){
+        read.getline(texto, 500);
+        vector = strtok(texto," ");
+        if(cont == 0){
+          cont = cont + 1;
+          numeroExtremidades = atoi(vector);
+        }else{
+            while(vector != NULL){
+              vectorX = atoi(vector);
+              vector = strtok(NULL," ");
+              vectorY = atoi(vector);
+              vector = strtok(NULL," ");
+              vectorZ = atoi(vector);
+              vector = strtok(NULL," ");
+
+
+              file << "C" << " " << "1" << " " << "0" << " " << "0" << "\n";
+              file << "X" << " " << to_string(vectorX) << "\n";
+              file << "Y" << " " << to_string(vectorY) << "\n";
+              file << "Z" << " " << to_string(vectorZ) << "\n";
+              file << "B" << " " << to_string(vectorXPad) << "\n";
+              file << "N" << " " << to_string(vectorYPad) << "\n";
+              file << "M" << " " << to_string(vectorZPad) << "\n";
+              if(numExt != numeroExtremidades){
+                file << "D" << " " <<"1" << "\n";
+              }else{
+                file << "D" << " " <<"0" << "\n";
+              }
+              file << "--" << "\n";
+
+              vectorXPad = vectorXPad + vectorX;
+              vectorYPad = vectorYPad + vectorY;
+              vectorZPad = vectorZPad + vectorZ;
+              int longitud = sqrt(((vectorX)*(vectorX))+((vectorY)*(vectorY))+((vectorZ)*(vectorZ)));
+              acumlong = acumlong + longitud;
+            }
+        }
+        numExt = numExt + 1;
+      }
+    } else {
+      cout << "¡Error! El archivo no pudo ser abierto." << endl;
+    }
+    read.close();
+
+
+
+  }else{
+    cout << "¡Error! El archivo no pudo ser creado." << endl;
+  }
+  file.close();
+
+
   // Read world and keep the star of this solar system
-  return( new SpatialObject( argv[ 1 ] ) );
+  return( new SpatialObject( nombre ));
 }
 
 // -------------------------------------------------------------------------
@@ -124,9 +202,6 @@ void displayCbk( )
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   glMatrixMode( GL_MODELVIEW );
 
-  myCamera.setFOV( 45 );
-  myCamera.setPlanes( 1e-2, 100000 );
-
   glLoadIdentity( );
 
 
@@ -134,66 +209,18 @@ void displayCbk( )
   myCamera.loadCameraMatrix( );
 
   glPushMatrix(); //Se guarda la matrix de camara
-  glBegin(GL_LINES);
-    glColor3f(1,0,0);
-    glVertex3f(0,0,0);
-    glVertex3f(100,0,0);
-
-    glColor3f(0,1,0);
-    glVertex3f(0,0,0);
-    glVertex3f(0,100,0);
-
-    glColor3f(0,0,1);
-    glVertex3f(0,0,0);
-    glVertex3f(0,0,100);
-
-  glEnd();
   glColor3f(1,1,0);
   glTranslatef(0,-10,0);
   glScalef(100,20,100);
   glutWireCube(1.0);
   glPopMatrix(); //Se saca la matrix inicial
 
-  if(validar == false){
-    char texto[500];
-    ifstream read;
-    char * vector;
-    int cont = 0;
-    acumlong = 0;
-    numExt = 0;
-    read.open(archivo,ios::out);
-    if(read.is_open()){
-      while(!read.eof()){
-        read.getline(texto, 500);
-        vector = strtok(texto," ");
-        numExt = numExt+1;
-        if(cont == 0){
-          cont = cont + 1;
-          numeroExtremidades = atoi(vector);
-        }else{
-            while(vector != NULL){
-              vectorX = atoi(vector);
-              vector = strtok(NULL," ");
-              vectorY = atoi(vector);
-              vector = strtok(NULL," ");
-              vectorZ = atoi(vector);
-              vector = strtok(NULL," ");
-
-              int longitud = sqrt(((vectorX)*(vectorX))+((vectorY)*(vectorY))+((vectorZ)*(vectorZ)));
-              acumlong = acumlong + longitud;
-            }
-            //LECTURA DEL BRAZO
-        }
-
-      }
-    } else {
-      cout << "¡Error! El archivo no pudo ser abierto." << endl;
-    }
-    read.close();
 
 
-    //validar = true;
-  }
+  glPushMatrix();
+  myStar->drawInOpenGLContext(GL_LINES);
+  glPopMatrix();
+
 
   glPushMatrix();
   glColor3f(0,1,1);

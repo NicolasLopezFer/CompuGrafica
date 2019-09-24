@@ -66,6 +66,15 @@ public:
   //@{
   const std::string& getName( ) const;
   const float& getScale( ) const;
+  const float& getRed() const;
+  const float& getGreen() const;
+  const float& getBlue() const;
+  const float& getVerX() const;
+  const float& getVerY() const;
+  const float& getVerZ() const;
+  const float& getVerXPad() const;
+  const float& getVerYPad() const;
+  const float& getVerZPad() const;
   //@}
 
   void setPath( float r1, float r2, float nx, float ny, float nz );
@@ -87,6 +96,15 @@ protected:
 protected:
   std::string m_Name;
   float       m_Scale;
+  float       red;
+  float       green;
+  float       blue;
+  float       verX;
+  float       verY;
+  float       verZ;
+  float       verXPad;
+  float       verYPad;
+  float       verZPad;
   Mesh*       m_Mesh;
   Mesh*       m_Path;
 

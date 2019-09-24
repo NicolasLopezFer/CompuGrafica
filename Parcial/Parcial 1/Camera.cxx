@@ -19,10 +19,10 @@ Camera( )
   this->setWindow( 1, 1 );
   this->setPlanes( 1e-2, 10000 );
 
-  this->m_Position = Vector( 0, 0 , 200);
+  this->m_Position = Vector( );
   this->m_Focus = Vector( 0, 0, -1 );
   this->m_RightVector = Vector ( 1 );
-  this->m_UpVector = Vector( 0, 1 , 0);
+  this->m_UpVector = Vector( 0, 1);
   this->m_Rotations = Vector( );
   this->m_RefX = this->m_RefY = 0;
 }
@@ -38,6 +38,13 @@ void Camera::
 move( const Vector& dir )
 {
   this->m_Position += dir;
+}
+
+void Camera::
+lookAt( const Vector& pnt )
+{
+  this->m_Focus = pnt - this->m_Position;
+  this->m_Focus.normalize( );
 }
 
 // -------------------------------------------------------------------------

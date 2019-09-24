@@ -18,6 +18,7 @@ public:
   //@}
 
   void move( const Vector& dir );
+  void lookAt( const Vector& pnt );
   void rotX( float a );
   void rotY( float a );
   void rotZ( float a );
@@ -44,7 +45,7 @@ protected:
   int m_WindowHeight;
 
   Vector m_Focus;
-  Vector m_RightVector;	
+  Vector m_RightVector;
   Vector m_UpVector;
   Vector m_Position;
   Vector m_Rotations;

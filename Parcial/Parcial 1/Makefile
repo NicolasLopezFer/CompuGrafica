@@ -1,8 +1,8 @@
 CXXFLAGS := -std=c++11 -g
 LIBS := -framework OpenGL -framework GLUT
 #LIBS := -lm -lGL -lGLU -lglut
-HEADERS := Vector.h Camera.h Mesh.h SpatialObject.h
-OBJS := BrazoRobotico.o Vector.o Camera.o Mesh.o SpatialObject.o
+HEADERS := Vector.h Mesh.h Camera.h SpatialObject.h
+OBJS := BrazoRobotico.o Camera.o Vector.o Mesh.o SpatialObject.o
 
 all: BrazoRobotico
 

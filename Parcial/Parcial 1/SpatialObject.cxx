@@ -3,6 +3,12 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <fstream>
+#include <iostream>
+#include <string.h>
+#include <stdlib.h>
+
+using namespace std;
 
 // -------------------------------------------------------------------------
 SpatialObject::
@@ -112,6 +118,60 @@ getScale( ) const
   return( this->m_Scale );
 }
 
+const float& SpatialObject::
+getRed( ) const
+{
+  return( this->red );
+}
+
+const float& SpatialObject::
+getGreen( ) const
+{
+  return( this->green );
+}
+
+const float& SpatialObject::
+getBlue( ) const
+{
+  return( this->blue );
+}
+
+const float& SpatialObject::
+getVerX( ) const
+{
+  return( this->verX );
+}
+
+const float& SpatialObject::
+getVerY( ) const
+{
+  return( this->verY );
+}
+
+const float& SpatialObject::
+getVerZ( ) const
+{
+  return( this->verZ );
+}
+
+const float& SpatialObject::
+getVerXPad( ) const
+{
+  return( this->verXPad );
+}
+
+const float& SpatialObject::
+getVerYPad( ) const
+{
+  return( this->verYPad );
+}
+
+const float& SpatialObject::
+getVerZPad( ) const
+{
+  return( this->verZPad );
+}
+
 // -------------------------------------------------------------------------
 void SpatialObject::
 setPath( float r1, float r2, float nx, float ny, float nz )
@@ -146,44 +206,25 @@ stopAnimation( )
 void SpatialObject::
 drawInOpenGLContext( GLenum mode )
 {
-  if( this->m_Mesh == nullptr )
-    return;
 
-  // Save call matrix
-  glPushMatrix( );
+  glPushMatrix();
+  glPopMatrix();
 
-  // Show path
-  glPushMatrix( );
-  glScalef( this->m_Radius1, this->m_Radius2, 1 );
-  this->m_Path->drawInOpenGLContext( GL_LINE_LOOP );
-  glPopMatrix( );
+  glColor3f( this->getRed(), this->getGreen()+0.5, this->getBlue() );
+  glBegin(mode);
+  glVertex3f (this->getVerXPad(),this->getVerYPad(),this->getVerZPad());
+  glVertex3f( this->getVerX()+this->getVerXPad(), this->getVerY()+this->getVerYPad(), this->getVerZ()+this->getVerZPad() );
+  glEnd();
+  glPushMatrix();
+  glPopMatrix();
 
-  // Show spatial body
-  if( this->m_Animating && this->m_Frequency > 0 )
-  {
-    // Compute ellapsed milliseconds since aninamtion has started
-    double s =
-      std::chrono::duration_cast< std::chrono::milliseconds >(
-        std::chrono::high_resolution_clock::now( ) - this->m_StartAnimation
-        ).count( );
-    this->m_CurrentAngle = 2.0 * _PI * s / ( this->m_Frequency * 1000.0 );
-  } // end if
-  glTranslatef(
-    this->m_Radius1 * std::cos( this->m_CurrentAngle ),
-    this->m_Radius2 * std::sin( this->m_CurrentAngle ),
-    0
-    );
-  glPushMatrix( );
-  glScalef( this->m_Scale, this->m_Scale, this->m_Scale );
-  this->m_Mesh->drawInOpenGLContext( mode );
-  glPopMatrix( );
-
-  // Show children
-  for( SpatialObject* child: this->m_Children )
+  for( SpatialObject* child: this->m_Children ){
     child->drawInOpenGLContext( mode );
+    cout << child->getVerXPad() << endl;
+  }
 
-  // Get call matrix
-  glPopMatrix( );
+  glPopMatrix();
+
 }
 
 // -------------------------------------------------------------------------
@@ -210,6 +251,7 @@ _createPath( )
 void SpatialObject::
 _strIn( std::istream& in )
 {
+
   typedef std::map< char, std::string > _TMap;
 
   // Read data for this spatial object
@@ -235,67 +277,62 @@ _strIn( std::istream& in )
     std::getline( in, line );
   } // end while
 
-  // Check name
-  _TMap::const_iterator dIt = data.find( 'N' );
-  if( dIt == data.end( ) )
-    throw std::runtime_error( "Field \"N\" is required." );
-  this->m_Name = dIt->second;
-
-  // Check path
-  dIt = data.find( 'P' );
-  if( dIt == data.end( ) )
-    throw std::runtime_error( "Field \"P\" is required." );
-  std::istringstream path_str( dIt->second );
-  std::vector< float > path;
-  while( !path_str.eof( ) )
-  {
-    path.push_back( 0 );
-    path_str >> path.back( );
-  } // end while
-  if( path.size( ) == 4 )
-    this->setPath( path[ 0 ], path[ 0 ], path[ 1 ], path[ 2 ], path[ 3 ] );
-  else if( path.size( ) == 5 )
-    this->setPath( path[ 0 ], path[ 1 ], path[ 2 ], path[ 3 ], path[ 4 ] );
-  else
-    throw std::runtime_error( "Malformed path." );
-
-  // Check base model
-  dIt = data.find( 'M' );
-  if( dIt == data.end( ) )
-    throw std::runtime_error( "Field \"M\" is required." );
-  if( this->m_Mesh != nullptr )
-    delete this->m_Mesh;
-  this->m_Mesh = new Mesh( dIt->second );
-
+  _TMap::const_iterator dIt;
   // Check color
   dIt = data.find( 'C' );
-  float r = 1, g = 1, b = 1;
+  float r = 1, g = 0, b = 0;
   if( dIt != data.end( ) )
   {
     std::istringstream d( dIt->second );
     d >> r >> g >> b;
   } // end if
-  this->m_Mesh->setColor( r, g, b );
+  this->red = 1;
+  this->green = 0;
+  this->blue = 0;
 
   // Check scale
-  dIt = data.find( 'S' );
+  dIt = data.find( 'X' );
   if( dIt != data.end( ) )
   {
     std::istringstream d( dIt->second );
-    d >> this->m_Scale;
+    d >> this->verX;
   }
-  else
-    this->m_Scale = 1;
 
-  // Check frequency
-  dIt = data.find( 'F' );
+  dIt = data.find( 'Y' );
   if( dIt != data.end( ) )
   {
     std::istringstream d( dIt->second );
-    d >> this->m_Frequency;
+    d >> this->verY;
   }
-  else
-    this->m_Frequency = 0;
+
+  dIt = data.find( 'Z' );
+  if( dIt != data.end( ) )
+  {
+    std::istringstream d( dIt->second );
+    d >> this->verX;
+  }
+
+  dIt = data.find( 'B' );
+  if( dIt != data.end( ) )
+  {
+    std::istringstream d( dIt->second );
+    d >> this->verXPad;
+  }
+
+  dIt = data.find( 'N' );
+  if( dIt != data.end( ) )
+  {
+    std::istringstream d( dIt->second );
+    d >> this->verYPad;
+  }
+
+  dIt = data.find( 'M' );
+  if( dIt != data.end( ) )
+  {
+    std::istringstream d( dIt->second );
+    d >> this->verZPad;
+  }
+
 
   // Check recursion
   dIt = data.find( 'D' );
