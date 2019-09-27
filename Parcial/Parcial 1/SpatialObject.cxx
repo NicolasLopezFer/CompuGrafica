@@ -8,7 +8,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 using namespace std;
+float q = 0;
+float b = 0;
+bool pintado = false;
 
 // -------------------------------------------------------------------------
 SpatialObject::
@@ -91,23 +95,48 @@ getNumberOfChildren( ) const
 }
 
 // -------------------------------------------------------------------------
-SpatialObject* SpatialObject::
-getChild( unsigned long i )
+void SpatialObject::
+getChild( float i , float r, float rx, float ry, float rz)
 {
-  return( this->m_Children[ i ] );
+  q = q + 1;
+    if(q == i ){
+      if(r == 1){
+        if(rx == 1){
+          this->setMovActX(this->getMovActX()+1);
+        }
+        if(ry == 1){
+          this->setMovActY(this->getMovActY()+1);
+        }
+
+        if(rz == 1){
+          this->setMovActZ(this->getMovActZ()+1);
+        }
+      }
+      if(r == -1){
+        if(rx == 1){
+          this->setMovActX(this->getMovActX()-1);
+        }
+        if(ry == 1){
+          this->setMovActY(this->getMovActY()-1);
+        }
+
+        if(rz == 1){
+          this->setMovActZ(this->getMovActZ()-1);
+        }
+      }
+    }else{
+      for( SpatialObject* child: this->m_Children){
+        child->getChild(i, r, rx, ry, rz);
+    }
+  }
 }
 
-// -------------------------------------------------------------------------
-const SpatialObject* SpatialObject::
-getChild( unsigned long i ) const
-{
-  return( this->m_Children[ i ] );
-}
 
 // -------------------------------------------------------------------------
 const std::string& SpatialObject::
 getName( ) const
 {
+
   return( this->m_Name );
 }
 
@@ -155,22 +184,29 @@ getVerZ( ) const
 }
 
 const float& SpatialObject::
-getVerXPad( ) const
+getRotacion( ) const
 {
-  return( this->verXPad );
+  return( this->rotacion );
 }
 
 const float& SpatialObject::
-getVerYPad( ) const
+getMovActX( ) const
 {
-  return( this->verYPad );
+  return( this->movActX );
 }
 
 const float& SpatialObject::
-getVerZPad( ) const
+getMovActY( ) const
 {
-  return( this->verZPad );
+  return( this->movActY );
 }
+
+const float& SpatialObject::
+getMovActZ( ) const
+{
+  return( this->movActZ );
+}
+
 
 // -------------------------------------------------------------------------
 void SpatialObject::
@@ -182,6 +218,30 @@ setPath( float r1, float r2, float nx, float ny, float nz )
   this->m_Normal[ 1 ] = ny;
   this->m_Normal[ 2 ] = nz;
   this->m_Normal.normalize( );
+}
+
+void SpatialObject::
+setRotacion( float rot )
+{
+  this->rotacion = rot;
+}
+
+void SpatialObject::
+setMovActX( float x )
+{
+  this->movActX = x;
+}
+
+void SpatialObject::
+setMovActY( float y )
+{
+  this->movActY = y;
+}
+
+void SpatialObject::
+setMovActZ( float z )
+{
+  this->movActZ = z;
 }
 
 // -------------------------------------------------------------------------
@@ -204,27 +264,219 @@ stopAnimation( )
 }
 
 void SpatialObject::
-drawInOpenGLContext( GLenum mode )
+drawInOpenGLContext( GLenum mode , bool agarrar)
 {
-
+  pintado = false;
   glPushMatrix();
-  glPopMatrix();
 
-  glColor3f( this->getRed(), this->getGreen()+0.5, this->getBlue() );
-  glBegin(mode);
-  glVertex3f (this->getVerXPad(),this->getVerYPad(),this->getVerZPad());
-  glVertex3f( this->getVerX()+this->getVerXPad(), this->getVerY()+this->getVerYPad(), this->getVerZ()+this->getVerZPad() );
-  glEnd();
-  glPushMatrix();
-  glPopMatrix();
+  glColor3f(0,0,1);
+  glutSolidSphere(3.1,20,20);
 
-  for( SpatialObject* child: this->m_Children ){
-    child->drawInOpenGLContext( mode );
-    cout << child->getVerXPad() << endl;
+    glColor3f( this->getRed(), this->getGreen(), this->getBlue() );
+
+  glRotatef(this->getMovActX(), 1, 0, 0);
+  glRotatef(this->getMovActY(), 0, 1, 0 );
+  glRotatef(this->getMovActZ(), 0, 0, 1 );
+
+  if(this->getVerX() == 0){
+    if(this->getVerZ() == 0){
+      glBegin(mode);
+      glVertex3f (0+3,0,0+3);
+      glVertex3f (0+3,0,0-3);
+      glVertex3f (0-3,0,0-3);
+      glVertex3f (0-3,0,0+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0+3,0,0+3);
+      glVertex3f (0-3,0,0+3);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()+3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0+3,0,0-3);
+      glVertex3f (0+3,0,0+3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()+3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()-3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0-3,0,0-3);
+      glVertex3f (0+3,0,0-3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()-3);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()-3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0-3,0,0+3);
+      glVertex3f (0-3,0,0-3);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()-3);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()-3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()-3);
+      glVertex3f( this->getVerX()+3, this->getVerY(), this->getVerZ()+3);
+      glVertex3f( this->getVerX()-3, this->getVerY(), this->getVerZ()+3);
+      glEnd();
+
+      pintado = true;
+    }
   }
 
+  if(this->getVerY() == 0){
+    if(this->getVerZ() == 0){
+      glBegin(mode);
+      glVertex3f (0,0+3,0+3);
+      glVertex3f (0,0+3,0-3);
+      glVertex3f (0,0-3,0-3);
+      glVertex3f (0,0-3,0+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0,0+3,0+3);
+      glVertex3f (0,0-3,0+3);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0,0+3,0-3);
+      glVertex3f (0,0+3,0+3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0,0-3,0-3);
+      glVertex3f (0,0+3,0-3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0,0-3,0+3);
+      glVertex3f (0,0-3,0-3);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+      glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+      glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+      glEnd();
+      pintado = true;
+    }
+  }
+
+  if(this->getVerX() == 0){
+    if(this->getVerY() == 0){
+      glBegin(mode);
+      glVertex3f (0+3,0+3,0);
+      glVertex3f (0+3,0-3,0);
+      glVertex3f (0-3,0-3,0);
+      glVertex3f (0-3,0+3,0);
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0+3,0+3,0+3);
+      glVertex3f (0-3,0+3,0+3);
+      glVertex3f( this->getVerX()-3, this->getVerY()+3, this->getVerZ());
+      glVertex3f( this->getVerX()+3, this->getVerY()+3, this->getVerZ());
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0+3,0-3,0);
+      glVertex3f (0+3,0+3,0);
+      glVertex3f( this->getVerX()+3, this->getVerY()+3, this->getVerZ());
+      glVertex3f( this->getVerX()+3, this->getVerY()-3, this->getVerZ());
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0-3,0-3,0);
+      glVertex3f (0+3,0-3,0);
+      glVertex3f( this->getVerX()+3, this->getVerY()-3, this->getVerZ());
+      glVertex3f( this->getVerX()-3, this->getVerY()-3, this->getVerZ());
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f (0-3,0+3,0);
+      glVertex3f (0-3,0-3,0);
+      glVertex3f( this->getVerX()-3, this->getVerY()-3, this->getVerZ());
+      glVertex3f( this->getVerX()-3, this->getVerY()+3, this->getVerZ());
+      glEnd();
+
+      glBegin(mode);
+      glVertex3f( this->getVerX()-3, this->getVerY()-3, this->getVerZ());
+      glVertex3f( this->getVerX()+3, this->getVerY()-3, this->getVerZ());
+      glVertex3f( this->getVerX()+3, this->getVerY()+3, this->getVerZ());
+      glVertex3f( this->getVerX()-3, this->getVerY()+3, this->getVerZ());
+      glEnd();
+      pintado = true;
+    }
+  }
+
+  if(pintado == false){
+    glBegin(mode);
+    glVertex3f (0,0+3,0+3);
+    glVertex3f (0,0+3,0-3);
+    glVertex3f (0,0-3,0-3);
+    glVertex3f (0,0-3,0+3);
+    glEnd();
+
+    glBegin(mode);
+    glVertex3f (0,0+3,0+3);
+    glVertex3f (0,0-3,0+3);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+    glEnd();
+
+    glBegin(mode);
+    glVertex3f (0,0+3,0-3);
+    glVertex3f (0,0+3,0+3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+    glEnd();
+
+    glBegin(mode);
+    glVertex3f (0,0-3,0-3);
+    glVertex3f (0,0+3,0-3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+    glEnd();
+
+    glBegin(mode);
+    glVertex3f (0,0-3,0+3);
+    glVertex3f (0,0-3,0-3);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+    glEnd();
+
+    glBegin(mode);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()-3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()-3);
+    glVertex3f( this->getVerX(), this->getVerY()+3, this->getVerZ()+3);
+    glVertex3f( this->getVerX(), this->getVerY()-3, this->getVerZ()+3);
+    glEnd();
+  }
+
+  glTranslatef( this->getVerX(), this->getVerY(), this->getVerZ() );
+  b = b+1;
+  glColor3f(0,0,1);
+  glutSolidSphere(3.1,20,20);
+
+  for( SpatialObject* child: this->m_Children ){
+    //cout << " X: " << child->getVerX() << " Y: " << child->getVerY() << " Z: " << child->getVerZ() << endl;
+    child->drawInOpenGLContext( mode , agarrar);
+    //cout << "------------------------------" << endl;
+  }
   glPopMatrix();
 
+  q = 0;
 }
 
 // -------------------------------------------------------------------------
@@ -251,6 +503,11 @@ _createPath( )
 void SpatialObject::
 _strIn( std::istream& in )
 {
+
+  this->setMovActX(0);
+  this->setMovActY(0);
+  this->setMovActZ(0);
+  this->setRotacion(0);
 
   typedef std::map< char, std::string > _TMap;
 
@@ -309,30 +566,8 @@ _strIn( std::istream& in )
   if( dIt != data.end( ) )
   {
     std::istringstream d( dIt->second );
-    d >> this->verX;
+    d >> this->verZ;
   }
-
-  dIt = data.find( 'B' );
-  if( dIt != data.end( ) )
-  {
-    std::istringstream d( dIt->second );
-    d >> this->verXPad;
-  }
-
-  dIt = data.find( 'N' );
-  if( dIt != data.end( ) )
-  {
-    std::istringstream d( dIt->second );
-    d >> this->verYPad;
-  }
-
-  dIt = data.find( 'M' );
-  if( dIt != data.end( ) )
-  {
-    std::istringstream d( dIt->second );
-    d >> this->verZPad;
-  }
-
 
   // Check recursion
   dIt = data.find( 'D' );
